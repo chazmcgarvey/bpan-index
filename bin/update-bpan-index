@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=1091,2030,2031,2034,2154
+
+source "${BPAN_ROOT?}/lib/bpan.bash" \
+  --prelude \
+  --getopt \
+  --say \
+
+getopt_spec="\
+$app <opts>
+
+Options:
+--
+p,push    Push index changes upstream
+
+h,help    Show help
+"
+
+main() (
+  getopt "$@"
+  set -- "${args[@]}"
+
+  [[ -d .git ]] ||
+    die "'$app $cmd' require './.git/' directory"
+  [[ $(git status -s) ]] &&
+    die "Can't update index.ini, repo has uncommitted changes"
+
+  pkg=${1?Requires a BPAN package name}
+  if [[ $pkg != */* ]]; then
+    pkg=bpan-org/$pkg
+  fi
+
+  if [[ ! $(index version) ]]; then
+    die "Can't update, not indexed '$pkg'"
+  fi
+
+  repo=$(mktemp -d)
+  rm -fr "$repo"
+  (
+    set -x
+    git clone -q "git@github.com:$pkg" "$repo"
+  )
+  trap 'rm -fr $repo' exit
+
+  config_file=$(readlink -f "$repo/.bpan/config")
+  config=$(< "$config_file")
+
+  version=$(conf bpan.version)
+  vversion=v${version//./-}
+
+  if [[ $(index "$vversion") ]]; then
+    die "Already indexed '$pkg $version'"
+  fi
+
+  sha1=$(git -C "$repo" rev-parse HEAD)
+
+  index version "$version"
+  index "$vversion" "$sha1"
+
+  say -y "Updated index.ini for '$pkg $version = $sha1'"
+
+  git commit -m "Update github:$pkg=$version" index.ini
+  say -y "Committed index.ini changes"
+
+  if $option_push; then
+    git push -q
+    say -y "Pushed commit"
+  fi
+)
+
+conf() (
+  git config -f- "$1" <<<"$config"
+)
+
+index() (
+  if [[ $# -eq 1 ]]; then
+    git config -f index.ini "pkg.github:$pkg.$1"
+  elif [[ $# -eq 2 ]]; then
+    git config -f index.ini "pkg.github:$pkg.$1" "$2"
+    sed -i 's/^\t//' index.ini
+  fi
+)
+
+main "$@"
