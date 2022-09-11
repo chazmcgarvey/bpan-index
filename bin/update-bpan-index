@@ -60,7 +60,7 @@ main() (
 
   say -y "Updated index.ini for '$pkg $version = $sha1'"
 
-  git commit -m "Update github:$pkg=$version" index.ini
+  git commit -q -m "Update github:$pkg=$version" index.ini
   say -y "Committed index.ini changes"
 
   if $option_push; then
