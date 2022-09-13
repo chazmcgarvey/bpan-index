@@ -2,12 +2,11 @@
 
 # shellcheck disable=1091,2030,2031,2034,2154
 
-source "${BPAN_ROOT?}/lib/bpan.bash" \
-  --prelude \
-  --getopt \
-  --say \
-
-getopt_spec="\
+source "${BPAN_ROOT?}/lib/bpan.bash" --app
+bpan:source config
+bpan:source git-utils
+bpan:source say
+bpan:source getopt "\
 $app <opts>
 
 Options:
@@ -21,12 +20,12 @@ main() (
   getopt "$@"
   set -- "${args[@]}"
 
-  [[ -d .git ]] ||
-    die "'$app $cmd' require './.git/' directory"
-  [[ $(git status -s) ]] &&
+  git:in-top-dir ||
+    die "'$app' must be run from repo root"
+  git:is-clean ||
     die "Can't update index.ini, repo has uncommitted changes"
 
-  pkg=${1?Requires a BPAN package name}
+  pkg=${1?$'\nError: A BPAN package name is required'}
   if [[ $pkg != */* ]]; then
     pkg=bpan-org/$pkg
   fi
@@ -44,9 +43,8 @@ main() (
   trap 'rm -fr $repo' exit
 
   config_file=$(readlink -f "$repo/.bpan/config")
-  config=$(< "$config_file")
-
-  version=$(conf bpan.version)
+  version=$(config:get bpan.version) ||
+    die "Can't get 'bpan.version' from config"
   vversion=v${version//./-}
 
   if [[ $(index "$vversion") ]]; then
@@ -67,10 +65,6 @@ main() (
     git push -q
     say -y "Pushed commit"
   fi
-)
-
-conf() (
-  git config -f- "$1" <<<"$config"
 )
 
 index() (
