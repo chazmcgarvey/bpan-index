@@ -51,7 +51,9 @@ main() (
     die "Already indexed '$pkg $version'"
   fi
 
-  sha1=$(git -C "$repo" rev-parse HEAD)
+  sha1=$(git -C "$repo" rev-parse "$version")
+  [[ ${#sha1} -eq 40 ]] ||
+    die "Can't get commit for $pkg $version"
 
   index version "$version"
   index "$vversion" "$sha1"
