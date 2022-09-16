@@ -11,9 +11,9 @@ $app <opts>
 
 Options:
 --
-p,push    Push index changes upstream
+p,push   Push index changes upstream
 
-h,help    Show help
+h,help        Show help
 "
 
 main() (
@@ -63,10 +63,19 @@ main() (
   git commit -q -m "Update github:$pkg=$version" index.ini
   say -y "Committed index.ini changes"
 
-  if $option_push; then
-    git push -q
-    say -y "Pushed commit"
-  fi
+  $option_push || return 0
+
+  git push -q
+  say -y "Pushed commit"
+
+  local=$BPAN_ROOT/local
+  local_index=$local/index.ini
+  mkdir -p "$local"
+  cp -Lp index.ini "$local_index"
+  say -y "Updated $local_index"
+
+  bpan install "$pkg"
+  say -y "Installed $pkg $version"
 )
 
 index() (
