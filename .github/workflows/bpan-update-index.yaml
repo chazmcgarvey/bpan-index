@@ -1,0 +1,88 @@
+# This GHA workflow is trigger by a special comment to a particular GitHub
+# issue on the repository.
+
+on:
+  # TODO Can we add more rules to limit the triggering of this workflow?
+  # Should only be allowed by package owner.
+  issue_comment:
+    type: created
+
+jobs:
+  bpan-release-job:
+    # TODO Can this URL be stored in Meta?
+    if: github.event.comment.issue_url ==
+          'https://api.github.com/repos/bpan-org/bpan-index/issues/1'
+
+    runs-on: ubuntu-latest
+
+    env:
+      ### Uncomment for debug output in log:
+      BPAN_INDEX_UPDATE_DEBUG: true
+      ### Uncomment for running in test mode:
+      # BPAN_INDEX_UPDATE_TESTING: true
+
+      gha_event_comment_url: ${{ github.event.comment.url }}
+      gha_event_comment_body: ${{ github.event.comment.body }}
+      gha_event_comment_reactions_url: ${{ github.event.comment.reactions.url }}
+      gha_run_id: ${{ github.run_id }}
+      gha_triggering_actor: ${{ github.triggering_actor }}
+
+    steps:
+    - name: Checkout bpan-org/bpan-index
+      uses: actions/checkout@v3
+
+    - name: Checkout bpan-org/bpan nested in bpan-index dir
+      uses: actions/checkout@v3
+      with:
+        repository: bpan-org/bpan
+        path: bpan
+        # ref: wip2
+
+    - name: Get request vars from JSON hidden in the request comment
+      uses: ./.github/actions/request-vars
+      id: vars
+
+    - name: Checkout the package repo release commit, nested in bpan-index
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.repo }}
+        ref: ${{ steps.vars.outputs.version }}
+        path: package
+
+    - name: Get the HTML url for the GHA job logs
+      uses: Tiryoh/gha-jobid-action@v0
+      id: jobs
+      with:
+        job_name: bpan-release-job
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+    ### Uncomment to debug in tmate:
+    # - name: Debug environment with tmate
+    #   uses: mxschmitt/action-tmate@v3
+    # - run: exit 123
+
+
+    # This step does all the work of package verification and index updating.
+    # It uses the `bpan` command to do it, so the logic is separate from this
+    # repository.
+    # The same logic is used client side by `bpan release` before it issues the
+    # request, to ensure the release will likely work.
+
+    - name: Check the release and update the BPAN index (if ok)
+      env:
+        gha_job_html_url:     ${{ steps.jobs.outputs.html_url }}
+        gha_request_package:  ${{ steps.vars.outputs.package }}
+        gha_request_owner:    ${{ steps.vars.outputs.owner }}
+        gha_request_repo:     ${{ steps.vars.outputs.repo }}
+        gha_request_version:  ${{ steps.vars.outputs.version }}
+        gha_request_commit:   ${{ steps.vars.outputs.commit }}
+
+      run: |
+        source bpan/.rc
+        if [[ ${BPAN_INDEX_UPDATE_DEBUG-} ]]; then
+          set -x
+          bpan -x release 2>&1
+        else
+          bpan release
+        fi

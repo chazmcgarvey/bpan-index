@@ -1,0 +1,22 @@
+# GHA local composite action to parse the BPAN index update request's JSON
+# into output variables for use by other workflow steps.
+
+outputs:
+  package:
+    value: ${{ steps.vars.outputs.package }}
+  owner:
+    value: ${{ steps.vars.outputs.owner }}
+  repo:
+    value: ${{ steps.vars.outputs.repo }}
+  version:
+    value: ${{ steps.vars.outputs.version }}
+  commit:
+    value: ${{ steps.vars.outputs.commit }}
+
+runs:
+  using: composite
+
+  steps:
+  - run: .github/actions/request-vars/request-vars.sh
+    id: vars
+    shell: bash
