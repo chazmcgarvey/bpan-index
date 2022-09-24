@@ -3,6 +3,8 @@ bpan-index
 
 The [BPAN](https://github.com/bpan-org/bpan#readme) Package Index
 
+![BPAN Release Flow](img/bpan-release.gif)
+
 ## Description
 
 This repo contains the index file that BPAN uses to find its packages.
