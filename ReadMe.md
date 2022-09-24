@@ -15,8 +15,8 @@ The (`bashplus` package) author runs:
   * Verify the release is ready
   * If ready, update the BPAN index
   * Notify the author of success or failure
-* This actual release is logged here:
-  * https://github.com/bpan-org/bpan-index/issues/1#issuecomment-1257059529
+* This actual release is logged [here](
+  https://github.com/bpan-org/bpan-index/issues/1#issuecomment-1257059529)
 
 ![BPAN Release Flow](img/bpan-release.gif)
 
