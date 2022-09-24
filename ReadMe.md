@@ -3,6 +3,16 @@ bpan-index
 
 The [BPAN](https://github.com/bpan-org/bpan#readme) Package Index
 
+## Synopsis
+
+This video show how a release is done from the command line.
+The author runs:
+
+* `bpan bump` - Prepare the next version release
+* `bapn release` - Submit the new release to the index updater
+* This actual release is logged here:
+  * https://github.com/bpan-org/bpan-index/issues/1#issuecomment-1257059529
+
 ![BPAN Release Flow](img/bpan-release.gif)
 
 ## Description
