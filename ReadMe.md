@@ -5,11 +5,16 @@ The [BPAN](https://github.com/bpan-org/bpan#readme) Package Index
 
 ## Synopsis
 
-This video show how a release is done from the command line.
-The author runs:
+This video shows how a BPAN release is done from the command line.
+The (`bashplus` package) author runs:
 
 * `bpan bump` - Prepare the next version release
 * `bapn release` - Submit the new release to the index updater
+* A comment is posted to https://github.com/bpan-org/bpan-index/issues/1
+* That triggers a GitHub Actions workflow to:
+  * Verify the release is ready
+  * If ready, update the BPAN index
+  * Notify the author of success or failure
 * This actual release is logged here:
   * https://github.com/bpan-org/bpan-index/issues/1#issuecomment-1257059529
 
