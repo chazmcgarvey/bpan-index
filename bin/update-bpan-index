@@ -25,20 +25,20 @@ main() (
   git:is-clean ||
     die "Can't update index.ini, repo has uncommitted changes"
 
-  pkg=${1?$'\nError: A BPAN package name is required'}
-  if [[ $pkg != */* ]]; then
-    pkg=bpan-org/$pkg
+  package=${1?$'\nError: A BPAN package name is required'}
+  if [[ $package != */* ]]; then
+    package=bpan-org/$package
   fi
 
   if [[ ! $(index version) ]]; then
-    die "Can't update, not indexed '$pkg'"
+    die "Can't update, not indexed '$package'"
   fi
 
   repo=$(mktemp -d)
   rm -fr "$repo"
   (
     set -x
-    git clone -q "git@github.com:$pkg" "$repo"
+    git clone -q "git@github.com:$package" "$repo"
   )
   trap 'rm -fr $repo' exit
 
@@ -48,19 +48,19 @@ main() (
   vversion=v${version//./-}
 
   if [[ $(index "$vversion") ]]; then
-    die "Already indexed '$pkg $version'"
+    die "Already indexed '$package $version'"
   fi
 
   sha1=$(git -C "$repo" rev-parse "$version")
   [[ ${#sha1} -eq 40 ]] ||
-    die "Can't get commit for $pkg $version"
+    die "Can't get commit for $package $version"
 
   index version "$version"
   index "$vversion" "$sha1"
 
-  say -y "Updated index.ini for '$pkg $version = $sha1'"
+  say -y "Updated index.ini for '$package $version = $sha1'"
 
-  git commit -q -m "Update github:$pkg=$version" index.ini
+  git commit -q -m "Update github:$package=$version" index.ini
   say -y "Committed index.ini changes"
 
   $option_push || return 0
@@ -74,15 +74,15 @@ main() (
   cp -Lp index.ini "$local_index"
   say -y "Updated $local_index"
 
-  bpan install "$pkg"
-  say -y "Installed $pkg $version"
+  bpan install "$package"
+  say -y "Installed $package $version"
 )
 
 index() (
   if [[ $# -eq 1 ]]; then
-    git config -f index.ini "pkg.github:$pkg.$1"
+    git config -f index.ini "package.github:$package.$1"
   elif [[ $# -eq 2 ]]; then
-    git config -f index.ini "pkg.github:$pkg.$1" "$2"
+    git config -f index.ini "package.github:$package.$1" "$2"
     sed -i 's/^\t//' index.ini
   fi
 )
