@@ -1,6 +1,24 @@
 # This GHA workflow is trigger by a special comment to a particular GitHub
 # issue on the repository.
 
+### TESTING ###
+#
+# To set up testing:
+# * Make a repo called:
+#   * https://github.com/bpan-org/bpan-index-testing
+# * Add a remote call testing:
+#   * git remote add testing https://github.com/bpan-org/bpan-index-testing
+# * Change the github.event.comment.issue_url below to:
+#   * https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1
+# * Uncomment the 'ref: testing' line below
+# * Commit change to this repo and 'git push testing main'
+#
+# * Push changes to bpan's lib/release.bash to a branch called 'testing'
+#
+# * In a BPAN package:
+#   * export BPAN_INDEX_REPO_URL=https://github.com/bpan-org/bpan-index-testing
+#   * bpan bump --release
+
 on:
   # TODO Can we add more rules to limit the triggering of this workflow?
   # Should only be allowed by package owner.
@@ -12,6 +30,8 @@ jobs:
     # TODO Can this URL be stored in Meta?
     if: github.event.comment.issue_url ==
           'https://api.github.com/repos/bpan-org/bpan-index/issues/1'
+          # For testing index updater:
+          # 'https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1'
 
     runs-on: ubuntu-latest
 
@@ -36,7 +56,8 @@ jobs:
       with:
         repository: bpan-org/bpan
         path: bpan
-        # ref: wip2
+        # For testing index updater:
+        # ref: testing
 
     - name: Get request vars from JSON hidden in the request comment
       uses: ./.github/actions/request-vars
