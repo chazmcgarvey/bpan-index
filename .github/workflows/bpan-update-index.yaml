@@ -6,7 +6,8 @@
 # To set up testing:
 # * Make a repo called:
 #   * https://github.com/bpan-org/bpan-index-testing
-# * Add a remote call testing:
+# * Create a github issue #1 for the bpan-index-testing repo
+# * Add a remote call 'testing':
 #   * git remote add testing https://github.com/bpan-org/bpan-index-testing
 # * Change the github.event.comment.issue_url below to:
 #   * https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1
