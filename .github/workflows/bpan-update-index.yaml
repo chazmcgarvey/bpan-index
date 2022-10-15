@@ -35,7 +35,7 @@ jobs:
           # For testing index updater:
           # 'https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1'
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     env:
       ### Uncomment for debug output in log:
@@ -50,6 +50,13 @@ jobs:
       gha_triggering_actor: ${{ github.triggering_actor }}
 
     steps:
+    - name: Install dependencies
+      run: |
+        apt-get install -y \
+          pandoc \
+          shellcheck \
+        && true
+
     - name: Checkout bpan-org/bpan-index
       uses: actions/checkout@v3
 
