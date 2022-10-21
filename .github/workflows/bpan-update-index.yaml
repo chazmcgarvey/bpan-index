@@ -1,25 +1,23 @@
 
-# This GHA workflow is trigger by a special comment to a particular GitHub
+# This GHA workflow is triggered by a special comment to a particular GitHub
 # issue on the repository.
 
 ### TESTING ###
 #
-# To set up testing:
-# * Make a repo called:
-#   * https://github.com/bpan-org/bpan-index-testing
-# * Create a github issue #1 for the bpan-index-testing repo
-# * Add a remote call 'testing':
-#   * git remote add testing https://github.com/bpan-org/bpan-index-testing
+# To set up a BPAN Publishing Testing Environment:
+# * Fork the 'bpan-org/bpan' repo to '<user>'
+#
+# * Copy repo 'bpan-org/bpan-index' repo (this repo) to '<user>/bpan-index'
+#   * Can't "fork" this repo because forks can't use github issues
+# * Create a github issue #1 for the copied bpan-index repo
 # * Change the github.event.comment.issue_url below to:
-#   * https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1
-# * Uncomment the 'ref: testing' line below
-# * Commit change to this repo and 'git push testing main'
+#   * https://api.github.com/repos/<user>/bpan-index/issues/1
+# * Commit changes and 'git push'
 #
-# * Push changes to bpan's lib/publish.bash to a branch called 'testing'
-#
-# * In a BPAN package:
-#   * export BPAN_INDEX_REPO_URL=https://github.com/bpan-org/bpan-index-testing
-#   * bpan bump --publish
+# * In a BPAN package repository clone directory, run these commands:
+#   * `bpan config index.bpan.repo-url https://github.com/<user>/bpan-index`
+#   * `bpan config index.bpan.publish-url https://api.github.com/repos/<user>/bpan-index/issues/1/comments`
+#   * `bpan bump --publish`
 
 on:
   # TODO Can we add more rules to limit the triggering of this workflow?
@@ -27,29 +25,26 @@ on:
   issue_comment:
     type: created
 
+env:
+  ### Show debug output in log:
+  BPAN_INDEX_UPDATE_DEBUG: true
+
+  gha_event_comment_url: ${{ github.event.comment.url }}
+  gha_event_comment_body: ${{ github.event.comment.body }}
+  gha_event_comment_reactions_url: ${{ github.event.comment.reactions.url }}
+  gha_run_id: ${{ github.run_id }}
+  gha_triggering_actor: ${{ github.triggering_actor }}
+
+
 jobs:
   bpan-publish-job:
-    # TODO Can this URL be stored in Meta?
     if: github.event.comment.issue_url ==
-          'https://api.github.com/repos/bpan-org/bpan-index/issues/1'
-          # For testing index updater:
-          # 'https://api.github.com/repos/bpan-org/bpan-index-testing/issues/1'
+        'https://api.github.com/repos/bpan-org/bpan-index/issues/1'
 
     runs-on: ubuntu-22.04
 
-    env:
-      ### Uncomment for debug output in log:
-      BPAN_INDEX_UPDATE_DEBUG: true
-      ### Uncomment for running in test mode:
-      # BPAN_INDEX_UPDATE_TESTING: true
-
-      gha_event_comment_url: ${{ github.event.comment.url }}
-      gha_event_comment_body: ${{ github.event.comment.body }}
-      gha_event_comment_reactions_url: ${{ github.event.comment.reactions.url }}
-      gha_run_id: ${{ github.run_id }}
-      gha_triggering_actor: ${{ github.triggering_actor }}
-
     steps:
+
     - name: Install dependencies
       run: |
         sudo \
@@ -59,18 +54,16 @@ jobs:
           shellcheck \
         && true
 
-    - name: Checkout bpan-org/bpan-index
+    - name: Checkout this (bpan-index) repo
       uses: actions/checkout@v3
 
-    - name: Checkout bpan-org/bpan nested in bpan-index dir
+    - name: Checkout bpan repo nested in bpan-index dir
       uses: actions/checkout@v3
       with:
         repository: bpan-org/bpan
         path: bpan
-        # For testing index updater:
-        # ref: testing
 
-    - name: Get request vars from JSON hidden in the request comment
+    - name: Get request vars from the JSON hidden in the request comment
       uses: ./.github/actions/request-vars
       id: vars
 
@@ -112,7 +105,7 @@ jobs:
 
       run: |
         source bpan/.rc
-        if [[ ${BPAN_INDEX_UPDATE_DEBUG-} ]]; then
+        if [[ $BPAN_INDEX_UPDATE_DEBUG ]]; then
           set -x
           bpan -x publish 2>&1
         else

@@ -19,8 +19,10 @@ name=${package#github:}
 owner=${name%%/*}
 repo=${name#*/}
 
-echo "::set-output name=package::$package"
-echo "::set-output name=owner::$owner"
-echo "::set-output name=repo::$repo"
-echo "::set-output name=version::$version"
-echo "::set-output name=commit::$commit"
+cat <<... > "$GITHUB_OUTPUT"
+package=$package
+owner=$owner
+repo=$repo
+version=$version
+commit=$commit
+...
