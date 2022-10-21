@@ -1,22 +1,19 @@
 
 # This GHA workflow is triggered by a special comment to a particular GitHub
-# issue on the repository.
+# Issue on the repository.
 
 ### TESTING ###
 #
 # To set up a BPAN Publishing Testing Environment:
+#
 # * Fork the 'bpan-org/bpan' repo to '<user>'
 #
-# * Copy repo 'bpan-org/bpan-index' repo (this repo) to '<user>/bpan-index'
-#   * Can't "fork" this repo because forks can't use github issues
-# * Create a github issue #1 for the copied bpan-index repo
-# * Change the github.event.comment.issue_url below to:
-#   * https://api.github.com/repos/<user>/bpan-index/issues/1
-# * Commit changes and 'git push'
+# * Copy this repo 'bpan-org/bpan-index' repo to '<user>/bpan-index'
+#   * Note: You can't "fork" this repo because forks can't use GitHub Issues
+# * Create a GitHub Issue #1 for the copied bpan-index repo
 #
 # * In a BPAN package repository clone directory, run these commands:
 #   * `bpan config index.bpan.repo-url https://github.com/<user>/bpan-index`
-#   * `bpan config index.bpan.publish-url https://api.github.com/repos/<user>/bpan-index/issues/1/comments`
 #   * `bpan bump --publish`
 
 on:
@@ -39,7 +36,7 @@ env:
 jobs:
   bpan-publish-job:
     if: github.event.comment.issue_url ==
-        'https://api.github.com/repos/bpan-org/bpan-index/issues/1'
+        'https://api.github.com/repos/${{ github.repository_owner }}/bpan-index/issues/1'
 
     runs-on: ubuntu-22.04
 
@@ -60,7 +57,7 @@ jobs:
     - name: Checkout bpan repo nested in bpan-index dir
       uses: actions/checkout@v3
       with:
-        repository: bpan-org/bpan
+        repository: ${{ github.repository_owner }}/bpan
         path: bpan
 
     - name: Get request vars from the JSON hidden in the request comment
