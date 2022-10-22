@@ -67,6 +67,24 @@ When you run `bpan publish` it will:
 * In either case you should be notified of the result
 
 
+## Testing 'bpan register' and 'bpan publish'
+
+To set up a BPAN Publishing Testing Environment:
+
+* Fork the 'bpan-org/bpan' repo to '<user>'
+  * Clone the forked 'bpan' repo
+  * Run 'source bpan/.rc' to use 'bpan' from the fork
+  * bpan config --global index.bpan.repo-url https://github.com/<user>/bpan-index
+
+* Copy this repo (bpan-org/bpan-index) repo to '<user>/bpan-index'
+  * Note: You can't "fork" this repo because forks can't use GitHub Issues
+* Create a GitHub Issue #1 for the copied bpan-index repo
+
+* In a BPAN package directory:
+  * Make a change and commit it
+  * bpan bump --publish
+
+
 ## Copyright and License
 
 Copyright 2022 by Ingy döt Net

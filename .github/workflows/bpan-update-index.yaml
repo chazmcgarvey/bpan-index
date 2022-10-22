@@ -2,22 +2,6 @@
 # This GHA workflow is triggered by a special comment to a particular GitHub
 # Issue on the repository.
 
-### TESTING ###
-#
-# To set up a BPAN Publishing Testing Environment:
-#
-# * Fork the 'bpan-org/bpan' repo to '<user>'
-#   * Clone the fork and 'source bpan/.rc'
-#   * `bpan config --global index.bpan.repo-url https://github.com/<user>/bpan-index`
-#
-# * Copy this repo (bpan-org/bpan-index) repo to '<user>/bpan-index'
-#   * Note: You can't "fork" this repo because forks can't use GitHub Issues
-# * Create a GitHub Issue #1 for the copied bpan-index repo
-#
-# * In a BPAN package directory:
-#   * Make a change and commit it
-#   * `bpan bump --publish`
-
 on:
   # TODO Can we add more rules to limit the triggering of this workflow?
   # Should only be allowed by package owner.
